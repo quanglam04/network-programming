@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import main.com.vn.constant.HttpMethod;
+import main.com.vn.constant.Path;
 import main.com.vn.util.ProxyMetrics;
 
 public class DashboardServer {
@@ -74,7 +75,7 @@ public class DashboardServer {
   }
 
   private void serveDashboard(HttpExchange exchange) throws IOException {
-    String filePath = "C:\\Users\\Lenovo\\Documents\\network-programming\\com.example\\src\\main\\java\\resources\\dashboard.html"; // đường dẫn tới file
+    String filePath = Path.dashBoardFilePath; // đường dẫn tới file
     File file = new File(filePath);
     if (!file.exists()) {
       sendResponse(exchange, 404, "dashboard.html not found");
