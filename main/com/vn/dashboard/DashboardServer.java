@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import main.com.vn.constant.HttpMethod;
-import main.com.vn.constant.Path;
 import main.com.vn.util.ProxyMetrics;
 
 public class DashboardServer {
