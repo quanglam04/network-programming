@@ -1,11 +1,11 @@
 # Forward Proxy Server
 
-## Introduce
+## ✨ Introduce
 
 Dự án Forward Proxy Server được xây dựng nhằm mô tả và triển khai một máy chủ proxy đóng vai trò trung gian giữa kết client và server đích. Proxy server tiếp nhận Request từ client, xử lý và chuyển 
 tiếp đến Server, sau đó trả lại kết quả cho Client. Hệ thống này cho phép quản lý, giám sát và điều hướng lưu lượng mạng hiệu quả hơn
 
-## Technology
+## 💻 Technology
 - Core: Java (17)
 - Networking: Socket programming
 - Web:
@@ -16,7 +16,7 @@ tiếp đến Server, sau đó trả lại kết quả cho Client. Hệ thống 
   - Maven
   - IntelliJ IDEA
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 network-programming/
@@ -47,7 +47,7 @@ Trong đó:
 - `util`: Bao gồm các tiện ích hỗ trợ (logging,...)
 - `resources/`: Chứa các tài nguyên tĩnh ảnh, file HTML,CSS,JavaScript
 
-## Feature
+## 🚀 Feature
 
 **Basic**
 - Forward request từ client tới Server đích
@@ -65,12 +65,12 @@ Trong đó:
 - Rate Limiting: Giới hạn số lượng request trong một khoảng thời gian nhất định
 - Loading Balancing: Phân phối tải khi server có nhiều server đích
 
-## Team Members
+## 👨‍💻 Team Members
 
 - Trịnh Quang Lâm
 - Cao Thị Thu Hương
 - Vũ Nhân Kiên
 
-## Overall
+## 📊 Overall
 
 ![alt text](public/img.png)
