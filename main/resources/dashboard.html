@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proxy Server Dashboard</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+
+    .header {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        padding: 30px;
+        text-align: center;
+        position: relative;
+    }
+
+    .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background-color: #27ae60;
+        border-radius: 50%;
+        margin-left: 10px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 30px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 25px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 1.1em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .logs-section {
+        padding: 0 30px 30px;
+    }
+
+    .logs-title {
+        font-size: 1.8em;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+    }
+
+    .logs-container {
+        background: #f8f9fa;
+        border-radius: 10px;
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e9ecef;
+    }
+
+    .log-entry {
+        padding: 12px 20px;
+        border-bottom: 1px solid #e9ecef;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease;
+    }
+
+    .log-entry:hover {
+        background-color: #e3f2fd;
+    }
+
+    .log-entry:last-child {
+        border-bottom: none;
+    }
+
+    .log-entry.error {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+
+    .log-entry.connect {
+        background-color: #e8f5e8;
+        color: #2e7d32;
+    }
+
+    .refresh-info {
+        text-align: center;
+        padding: 20px;
+        color: #7f8c8d;
+        font-style: italic;
+    }
+
+    .footer {
+        text-align: center;
+        padding: 20px;
+        background: #f8f9fa;
+        color: #7f8c8d;
+        border-top: 1px solid #e9ecef;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Proxy Server Dashboard <span class="status-indicator"></span></h1>
+    <p>Real-time monitoring and statistics</p>
+    <div id="current-time"></div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="total-requests">0</div>
+      <div class="stat-label">Total Requests</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="uptime">--</div>
+      <div class="stat-label">Uptime</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="requests-per-min">0</div>
+      <div class="stat-label">Req/Min</div>
+    </div>
+  </div>
+
+  <div class="logs-section">
+    <h2 class="logs-title">Recent Activity</h2>
+    <div class="logs-container">
+      <div id="logs-list">
+        <div class="log-entry">Waiting for requests...</div>
+      </div>
+    </div>
+    <div class="refresh-info">
+      Auto-refreshing every 2 seconds | Last update: <span id="last-update">--</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Mini HTTP Proxy Server - Dashboard v1.0</p>
+  </div>
+</div>
+
+<script>
+  let startTime = new Date();
+  let lastRequestCount = 0;
+  let requestHistory = [];
+
+  function updateDashboard() {
+      fetch('/api/stats')
+          .then(response => response.json())
+          .then(data => {
+              // Update total requests
+              document.getElementById('total-requests').textContent = data.totalRequests;
+
+              // Update current time
+              document.getElementById('current-time').textContent = data.currentTime;
+
+              // Update uptime
+              const uptime = Math.floor((new Date() - startTime) / 1000);
+              const hours = Math.floor(uptime / 3600);
+              const minutes = Math.floor((uptime % 3600) / 60);
+              const seconds = uptime % 60;
+              document.getElementById('uptime').textContent =
+                  `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+              // Calculate requests per minute
+              requestHistory.push({time: new Date(), count: data.totalRequests});
+              // Keep only last 10 minutes of data
+              const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+              requestHistory = requestHistory.filter(entry => entry.time > tenMinutesAgo);
+
+              let reqPerMin = 0;
+              if (requestHistory.length > 1) {
+                  const firstEntry = requestHistory[0];
+                  const lastEntry = requestHistory[requestHistory.length - 1];
+                  const timeDiff = (lastEntry.time - firstEntry.time) / (1000 * 60); // minutes
+                  const requestDiff = lastEntry.count - firstEntry.count;
+                  reqPerMin = timeDiff > 0 ? Math.round(requestDiff / timeDiff) : 0;
+              }
+              document.getElementById('requests-per-min').textContent = reqPerMin;
+
+              // Update logs
+              const logsContainer = document.getElementById('logs-list');
+              if (data.logs && data.logs.length > 0) {
+                  logsContainer.innerHTML = data.logs.map(log => {
+                      let className = 'log-entry';
+                      if (log.includes('ERROR') || log.includes('502 Bad Gateway')) {
+                          className += ' error';
+                      } else if (log.includes('CONNECT')) {
+                          className += ' connect';
+                      }
+                      return `<div class="${className}">${log}</div>`;
+                  }).join('');
+              } else {
+                  logsContainer.innerHTML = '<div class="log-entry">No requests yet...</div>';
+              }
+
+              // Update last update time
+              document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+          })
+          .catch(error => {
+              console.error('Error fetching stats:', error);
+              document.getElementById('last-update').textContent = 'Error - ' + new Date().toLocaleTimeString();
+          });
+  }
+
+  // Initial update
+  updateDashboard();
+
+  // Update every 2 seconds
+  setInterval(updateDashboard, 1000);
+</script>
+</body>
+</html>
