@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import main.com.vn.constant.HttpMethod;
+import main.com.vn.constant.Path;
 import main.com.vn.util.ProxyMetrics;
 
 public class DashboardServer {
@@ -28,6 +29,26 @@ public class DashboardServer {
       exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
       if (HttpMethod.GET.equals(exchange.getRequestMethod())) {
         serveDashboard(exchange);
+      } else {
+        sendResponse(exchange, 405, "Method Not Allowed");
+      }
+    });
+
+    // Serve CSS files
+    server.createContext("/css/", exchange -> {
+      exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+      if (HttpMethod.GET.equals(exchange.getRequestMethod())) {
+        serveCSSFile(exchange);
+      } else {
+        sendResponse(exchange, 405, "Method Not Allowed");
+      }
+    });
+
+    // Serve JS files
+    server.createContext("/js/", exchange -> {
+      exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+      if (HttpMethod.GET.equals(exchange.getRequestMethod())) {
+        serveJSFile(exchange);
       } else {
         sendResponse(exchange, 405, "Method Not Allowed");
       }
@@ -74,7 +95,7 @@ public class DashboardServer {
   }
 
   private void serveDashboard(HttpExchange exchange) throws IOException {
-    String filePath = Path.dashBoardFilePath; // đường dẫn tới file
+    String filePath = Path.dashBoardFilePath;
     File file = new File(filePath);
     if (!file.exists()) {
       sendResponse(exchange, 404, "dashboard.html not found");
@@ -82,6 +103,48 @@ public class DashboardServer {
     }
     byte[] bytes = Files.readAllBytes(Paths.get(filePath));
     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+    exchange.sendResponseHeaders(200, bytes.length);
+    try (OutputStream os = exchange.getResponseBody()) {
+      os.write(bytes);
+    }
+  }
+
+  private void serveCSSFile(HttpExchange exchange) throws IOException {
+    String requestPath = exchange.getRequestURI().getPath();
+    String fileName = requestPath.substring(requestPath.lastIndexOf("/") + 1);
+
+    // Tạo đường dẫn đầy đủ đến file CSS
+    String cssFilePath = Path.dashBoardFileCSSPath; // Bạn cần thêm path này vào class Path
+
+
+    File file = new File(cssFilePath);
+    if (!file.exists()) {
+      sendResponse(exchange, 404, "CSS file not found: " + fileName);
+      return;
+    }
+
+    byte[] bytes = Files.readAllBytes(Paths.get(cssFilePath));
+    exchange.getResponseHeaders().set("Content-Type", "text/css; charset=UTF-8");
+    exchange.sendResponseHeaders(200, bytes.length);
+    try (OutputStream os = exchange.getResponseBody()) {
+      os.write(bytes);
+    }
+  }
+
+  private void serveJSFile(HttpExchange exchange) throws IOException {
+    String requestPath = exchange.getRequestURI().getPath();
+    String fileName = requestPath.substring(requestPath.lastIndexOf("/") + 1);
+
+    String jsFilePath = Path.dashBoardFileJSPath; // Bạn cần thêm path này vào class Path
+
+    File file = new File(jsFilePath);
+    if (!file.exists()) {
+      sendResponse(exchange, 404, "JS file not found: " + fileName);
+      return;
+    }
+
+    byte[] bytes = Files.readAllBytes(Paths.get(jsFilePath));
+    exchange.getResponseHeaders().set("Content-Type", "application/javascript; charset=UTF-8");
     exchange.sendResponseHeaders(200, bytes.length);
     try (OutputStream os = exchange.getResponseBody()) {
       os.write(bytes);

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proxy Server Dashboard</title>
+  <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Proxy Server Dashboard <span class="status-indicator"></span></h1>
+    <p>Real-time monitoring and statistics</p>
+    <div id="current-time"></div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="total-requests">0</div>
+      <div class="stat-label">Total Requests</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="uptime">--</div>
+      <div class="stat-label">Uptime</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="requests-per-min">0</div>
+      <div class="stat-label">Req/Min</div>
+    </div>
+  </div>
+
+  <div class="logs-section">
+    <h2 class="logs-title">Recent Activity</h2>
+    <div class="logs-container">
+      <div id="logs-list">
+        <div class="log-entry">Waiting for requests...</div>
+      </div>
+    </div>
+    <div class="refresh-info">
+      Auto-refreshing every 2 seconds | Last update: <span id="last-update">--</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Mini HTTP Proxy Server - Dashboard v1.0</p>
+  </div>
+</div>
+
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>
